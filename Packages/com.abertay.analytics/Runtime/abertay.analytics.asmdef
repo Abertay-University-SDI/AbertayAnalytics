@@ -1,0 +1,20 @@
+{
+    "name": "abertay.analytics",
+    "rootNamespace": "",
+    "references": [
+        "GUID:fe25561d224ed4743af4c60938a59d0b",
+        "GUID:1104de264d522446f8274872ebf70b3d",
+        "GUID:5e0b455853cd340e0813387221dfd501",
+        "GUID:70ea675efa2644cef98c7ece24158333",
+        "GUID:85bdc4502f7530548b0fca3ce0f3c2b8"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
