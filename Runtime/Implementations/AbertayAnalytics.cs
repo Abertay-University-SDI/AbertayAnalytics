@@ -10,19 +10,26 @@ namespace Abertay.Analytics
 {
     public class AbertayAnalytics : IAnalytics
     {
-        private string m_UserID = "";
+        private string m_UserID = "NULL";
+        private string m_Environment = "";
         System.Action initCallback = null;
 
-        void IAnalytics.Initialise(Action callback)
+        /// <summary>
+        /// The environment name can be used to specify a different file name
+        /// </summary>
+        /// <param name="callback"></param>
+        /// <param name="environmentName"></param>
+        void IAnalytics.Initialise(Action callback, string environmentName)
         {
-            initCallback = callback;
-            m_UserID = PlayerPrefs.GetString("UserID", "");
+            if(environmentName.Length > 0)
+                m_Environment = environmentName;
             if (m_UserID.Length < 1)
             {
                 m_UserID = System.Guid.NewGuid().ToString();
                 PlayerPrefs.SetString("UserID", m_UserID.ToString());
             }
             CreateDirectory(Application.persistentDataPath + "/Analytics");
+            callback();
         }
 
 
@@ -35,17 +42,22 @@ namespace Abertay.Analytics
             return true; // TODO - check return value of System.IO.Directory.CreateDirectory(dir)
         }
 
-        void IAnalytics.InitialiseWithCustomID(string userID, Action callback)
+        /// <summary>
+        /// The environment name can be used to specify a different file name
+        /// </summary>
+        /// <param name="userID"></param>
+        /// <param name="callback"></param>
+        /// <param name="environmentName"></param>
+        void IAnalytics.InitialiseWithCustomID(string userID, Action callback, string environmentName)
         {
             m_UserID = userID;
-            if (m_UserID.Length > 0)
-            {
-                PlayerPrefs.SetString("UserID", m_UserID.ToString());
+            if (environmentName.Length > 0)
+                m_Environment = environmentName;
+            if (!(m_UserID.Length > 0)) {            
+                Debug.LogError("Trying to use a custom ID of an empty string. Setting to NULL");
+                m_UserID = "NULL";
             }
-            else
-            {
-                Debug.LogError("Trying to use a custom ID of an empty string.");
-            }
+            callback();
         }
 
         public void SendCustomEvent(string eventName, Dictionary<string, object> parameters)
@@ -61,11 +73,14 @@ namespace Abertay.Analytics
             customEvent.eventUUID = Hash128.Compute(eventName + customEvent.eventTimestamp + customEvent.userID).ToString(); //TODO: something better than this?
             customEvent.eventParams = parameters;
 
+            string fileName = "/Analytics/Event" + (m_Environment.Length > 0 ? ("_" + m_Environment):("")) + ".json";
+            string path = Application.persistentDataPath + fileName;
+
             //Load all events currently saved to disk
             List<CustomEvent> events = new List<CustomEvent>();
-            if (File.Exists(Application.persistentDataPath + "/Analytics/Event.json"))
+            if (File.Exists(path))
             {
-                events = JsonConvert.DeserializeObject<List<CustomEvent>>(File.ReadAllText(@Application.persistentDataPath + "/Analytics/Event.json"));
+                events = JsonConvert.DeserializeObject<List<CustomEvent>>(File.ReadAllText(@path));
             }
             //Add the new event
             events.Add(customEvent);
@@ -74,7 +89,6 @@ namespace Abertay.Analytics
 
             byte[] byteData;
             byteData = System.Text.Encoding.ASCII.GetBytes(jsonData);
-            string path = Application.persistentDataPath + "/Analytics/Event.json";
             // attempt to save event
             try
             {
@@ -87,10 +101,12 @@ namespace Abertay.Analytics
                 Debug.LogError("Error " + e.Message);
             }
         }
+#if GAMEANALYTICS
         void IAnalytics.SendCustomEvent(string eventName, Dictionary<string, object> parameters, float GA_Value = 0.0f)
         {
             SendCustomEvent(eventName, parameters);
         }
+#endif
 
     }
 }

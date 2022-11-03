@@ -22,7 +22,10 @@ namespace Abertay.Analytics
         //Serialized
         [Tooltip("If you don't initialise this on Start, you need to do this yourself or it won't work!")]
         [SerializeField] private bool m_InitialiseOnStart = true;
-        [SerializeField] private AnalyticSystem m_SystemType = AnalyticSystem.UnityAnalytics;
+        [SerializeField] private AnalyticSystem m_SystemType = AnalyticSystem.AbertayAnalytics;
+
+        [Tooltip("This is an optional parameter. Leave it blank unless you want a custom environment.")]
+        [SerializeField] private string m_EnvironmentName = "";
 
 #if GAMEANALYTICS
         //Getter
@@ -38,13 +41,14 @@ namespace Abertay.Analytics
         }
 #endif
         //private member
-        private IAnalytics m_AnalyticSystem;
+        private IAnalytics          m_AnalyticSystem;
 
         void Awake()
         {
             if (Instance == null)
             {
                 Instance = this;
+                DontDestroyOnLoad(gameObject);
                 switch (m_SystemType)
                 {
                     case AnalyticSystem.UnityAnalytics:
@@ -63,7 +67,7 @@ namespace Abertay.Analytics
             }
             else
             {
-                Debug.LogWarning("Trying to create a second analytics manager.\nDestroying this one!");
+                Debug.LogWarning("Trying to create a second analytics manager.\nDestroying this new one!");
                 Destroy(gameObject);
             }
         }
@@ -72,34 +76,38 @@ namespace Abertay.Analytics
         {
             if (!Initialised && m_InitialiseOnStart)
             {
-                m_AnalyticSystem.Initialise(() => { Initialised = true; });
+                m_AnalyticSystem.Initialise(() => { Initialised = true; }, m_EnvironmentName);                
             }
         }
-        public static void Initialise()
+        public static void Initialise(string environmentName = "")
         {
             if (!Initialised)
             {
-                Instance.m_AnalyticSystem.Initialise(() => { Initialised = true; });
+                Instance.m_AnalyticSystem.Initialise(() => { Initialised = true; }, environmentName);
             }
             else
             {
                 Debug.LogError("Attempting to initialise an already initialised system.");
             }
         }
-        public static void InitialiseWithCustomID(string customID)
+        public static void InitialiseWithCustomID(string customID, string environmentName = "", System.Action callback = null)
         {
             if (!Initialised)
             {
-                Instance.m_AnalyticSystem.InitialiseWithCustomID(customID, () => { Initialised = true; });
+                Instance.m_AnalyticSystem.InitialiseWithCustomID(customID, () => { Initialised = true; if (callback != null) callback(); }, environmentName);
             }
             else
             {
                 Debug.LogError("Attempting to initialise an already initialised system.");
             }
         }
+       
         public static void SendCustomEvent(string eventName, Dictionary<string, object> parameters)
         {
-            Instance.m_AnalyticSystem.SendCustomEvent(eventName, parameters);
+            if (Initialised)
+                Instance.m_AnalyticSystem.SendCustomEvent(eventName, parameters);
+            else
+                Debug.LogError("Attempting to send a custom event without initialising first.\nDid you forget to call Initialise?");
         }
     }
 }
