@@ -47,7 +47,7 @@ public class AnalyticTester : MonoBehaviour
             { "characterName", "Mario" },
             { "isCool", false }
         };
-
+#if GAMEANALYTICS
         if(AnalyticsManager.GetGAInstance != null)
         {
             //Remember! You can't get parameter data through game analytics without paying money
@@ -58,5 +58,6 @@ public class AnalyticTester : MonoBehaviour
             //You might also want to send a Progression Event
             AnalyticsManager.GetGAInstance.SendProgressionEvent(GameAnalyticsSDK.GAProgressionStatus.Complete, "World01-01");
         }
+#endif
     }
 }

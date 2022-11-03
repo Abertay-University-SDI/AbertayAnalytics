@@ -1,3 +1,4 @@
+//#define GAMEANALYTICS //Uncomment this if you want to use Game Analytics
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -7,10 +8,11 @@ namespace Abertay.Analytics
     public enum AnalyticSystem
     {
         UnityAnalytics,
+        #if GAMEANALYTICS
         GameAnalytics,
+        #endif
         AbertayAnalytics
     }
-
     public class AnalyticsManager : MonoBehaviour
     {
         //Static
@@ -22,6 +24,7 @@ namespace Abertay.Analytics
         [SerializeField] private bool m_InitialiseOnStart = true;
         [SerializeField] private AnalyticSystem m_SystemType = AnalyticSystem.UnityAnalytics;
 
+#if GAMEANALYTICS
         //Getter
         public static GameAnalytics GetGAInstance
         {
@@ -33,7 +36,7 @@ namespace Abertay.Analytics
                     return null;
             }
         }
-
+#endif
         //private member
         private IAnalytics m_AnalyticSystem;
 
@@ -48,9 +51,11 @@ namespace Abertay.Analytics
                     default:
                         m_AnalyticSystem = new UnityAnalytics();
                         break;
+#if GAMEANALYTICS
                     case AnalyticSystem.GameAnalytics:
                         m_AnalyticSystem = new GameAnalytics();
                         break;
+#endif
                     case AnalyticSystem.AbertayAnalytics:
                         m_AnalyticSystem = new AbertayAnalytics();
                         break;

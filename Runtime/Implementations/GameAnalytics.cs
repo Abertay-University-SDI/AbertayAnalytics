@@ -1,3 +1,5 @@
+//#define GAMEANALYTICS //Uncomment this if you want to use Game Analytics
+#if GAMEANALYTICS
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -71,3 +73,4 @@ namespace Abertay.Analytics
         }
     }
 }
+#endif
