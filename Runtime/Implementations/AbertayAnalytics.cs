@@ -57,6 +57,7 @@ namespace Abertay.Analytics
                 Debug.LogError("Trying to use a custom ID of an empty string. Setting to NULL");
                 m_UserID = "NULL";
             }
+            CreateDirectory(Application.persistentDataPath + "/Analytics");
             callback();
         }
 
