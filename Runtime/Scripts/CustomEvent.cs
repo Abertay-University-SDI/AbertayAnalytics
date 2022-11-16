@@ -9,6 +9,7 @@ namespace Abertay.Analytics
         public string userID;
         public string eventName;
         public string eventUUID;
+        public float GA_Value;
         public Dictionary<string, object> eventParams;
     }
 }

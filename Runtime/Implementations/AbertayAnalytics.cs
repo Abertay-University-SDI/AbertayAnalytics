@@ -61,7 +61,7 @@ namespace Abertay.Analytics
             callback();
         }
 
-        public void SendCustomEvent(string eventName, Dictionary<string, object> parameters)
+        public void SendCustomEvent(string eventName, Dictionary<string, object> parameters, float GA_Value)
         {
             //Build custom event structure
             CustomEvent customEvent = new CustomEvent();
@@ -72,6 +72,7 @@ namespace Abertay.Analytics
             customEvent.userID = m_UserID;
             customEvent.eventName = eventName;
             customEvent.eventUUID = Hash128.Compute(eventName + customEvent.eventTimestamp + customEvent.userID).ToString(); //TODO: something better than this?
+            customEvent.GA_Value = GA_Value;
             customEvent.eventParams = parameters;
 
             string fileName = "/Analytics/Event" + (m_Environment.Length > 0 ? ("_" + m_Environment):("")) + ".json";

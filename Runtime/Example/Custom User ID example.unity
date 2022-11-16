@@ -1077,6 +1077,18 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1810374959312665362, guid: d0e1b03230cdb0b4684e322e8b49bdfe, type: 3}
+      propertyPath: m_GameAnalytics
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1810374959312665362, guid: d0e1b03230cdb0b4684e322e8b49bdfe, type: 3}
+      propertyPath: m_UnityAnalytics
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1810374959312665362, guid: d0e1b03230cdb0b4684e322e8b49bdfe, type: 3}
+      propertyPath: m_AbertayAnalytics
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1810374959312665362, guid: d0e1b03230cdb0b4684e322e8b49bdfe, type: 3}
       propertyPath: m_InitialiseOnStart
       value: 0
       objectReference: {fileID: 0}

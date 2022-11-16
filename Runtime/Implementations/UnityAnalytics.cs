@@ -66,7 +66,7 @@ namespace Abertay.Analytics
                 callback();
         }
 
-        public void SendCustomEvent(string eventName, Dictionary<string, object> parameters)
+        public void SendCustomEvent(string eventName, Dictionary<string, object> parameters, float GA_Value)
         {
             // The ‘myEvent’ event will get queued up and sent every minute
             AnalyticsService.Instance.CustomData(eventName, parameters);

@@ -7,7 +7,7 @@ public class AnalyticTester : MonoBehaviour
 {
     private void Start()
     {
-        //If the Analytic Manager isn't set to initialise on start you can initialise it here
+        //If the Analytic Manager isn't set to initialise on Start you can initialise it here
             //AnalyticsManager.Initialise();
         //Or
             //AnalyticsManager.InitialiseWithCustomID("Custom ID goes here");

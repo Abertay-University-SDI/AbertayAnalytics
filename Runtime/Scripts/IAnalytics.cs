@@ -12,7 +12,7 @@ namespace Abertay.Analytics
         /// <returns>True if successful</returns>
         public void Initialise(System.Action callback, string environmentName);
         public void InitialiseWithCustomID(string userID, System.Action callback, string environmentName);
-        public void SendCustomEvent(string eventName, Dictionary<string, object> parameters);
+        public void SendCustomEvent(string eventName, Dictionary<string, object> parameters, float GA_Value);
 #if GAMEANALYTICS
         /// <summary>
         /// This version of the function call is only necessary when using Game Analytics.
