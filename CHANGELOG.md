@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2023-10-31
+
+###Added
+
+- Abertay Analytics now exports to CSV! Look for it in the Analytics/Events folder
+
 ## [0.4.3] - 2023-10-31
 
 ### Changed

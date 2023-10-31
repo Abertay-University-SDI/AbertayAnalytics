@@ -27,6 +27,18 @@ public class AnalyticTester : MonoBehaviour
         };
         AnalyticsManager.SendCustomEvent("LevelComplete", parameters);
     }
+    [ContextMenu("Send event")]
+    public void SendEventUnityAnalyticsStyle2()
+    {
+        // Send custom event
+        Dictionary<string, object> parameters = new Dictionary<string, object>()
+        {
+            { "someFloat",  Random.Range(0.0f,100.0f) },
+            { "timeRemaining",  Random.Range(0,1000) },
+            { "otherName", "Luigi" }
+        };
+        AnalyticsManager.SendCustomEvent("WorldComplete", parameters);
+    }
 
 #if GAMEANALYTICS
     /// <summary>

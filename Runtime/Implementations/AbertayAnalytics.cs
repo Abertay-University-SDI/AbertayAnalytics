@@ -87,18 +87,25 @@ namespace Abertay.Analytics
             customEvent.eventUUID = Hash128.Compute(eventName + customEvent.eventTimestamp + customEvent.userID).ToString(); //TODO: something better than this?
             customEvent.eventParams = parameters;
 
-            string JSONfileName = "/Analytics/Events/Events" + (m_Environment.Length > 0 ? ("_" + m_Environment):("")) + ".json";
-            string CSVfileName = "/Analytics/Events/Events" + (m_Environment.Length > 0 ? ("_" + m_Environment) : ("")) + ".csv";
+            string JSONfileName = "/Analytics/Events/Events" + (m_Environment.Length > 0 ? ("_" + m_Environment):("")) + "_JSON.json";
+            string CSVfileName = "/Analytics/Events/Events" + (m_Environment.Length > 0 ? ("_" + m_Environment) : ("")) + "_CSV.csv";
 
 #if UNITY_EDITOR
             string path = Application.dataPath;
 #else
         string path = Application.dataPath + "/..";
 #endif
-            string CSVpath  = path + JSONfileName;
+            string CSVpath  = path + CSVfileName;
             string JSONpath = path + JSONfileName;
 
             //TODO: CSV export
+            {
+                string header = "Timestamp,UserID,Event Name,UUID";
+                foreach(KeyValuePair<string,object> kvp in customEvent.eventParams)
+                {
+                    header += ",Param/" + kvp.Key;
+                }
+            }
 
             //Load all events currently saved to disk
             List<CustomEvent> events = new List<CustomEvent>();
@@ -108,6 +115,47 @@ namespace Abertay.Analytics
             }
             //Add the new event
             events.Add(customEvent);
+
+            //TODO: CSV export
+            File.WriteAllText(CSVpath, "");
+            using (StreamWriter sw = File.AppendText(CSVpath))
+            {
+                HashSet<string> keys = new HashSet<string>();
+                foreach (CustomEvent ce in events)
+                {
+                    foreach (KeyValuePair<string, object> kvp in ce.eventParams)
+                    {
+                        keys.Add(kvp.Key);
+                    }
+                }
+                string header = "Timestamp,UserID,Event Name,UUID";
+                foreach (string s in keys)
+                {
+                    header += ",Param/" + s;
+                }
+                sw.WriteLine(header);
+
+                string line = "";
+
+                foreach (CustomEvent ce in events)
+                {
+                    //log core info
+                    line = ce.eventTimestamp + "," + ce.userID + "," + ce.eventName + "," + ce.eventUUID;
+                    foreach(string s in keys)
+                    {
+                        if (ce.eventParams.ContainsKey(s))
+                        {
+                            line += "," + ce.eventParams[s];
+                        }
+                        else
+                        {
+                            line += ",";
+                        }
+                    }
+                    sw.WriteLine(line);
+                }
+                sw.Close();
+            }
 
             string jsonData = JsonConvert.SerializeObject(events, Formatting.Indented);
 
