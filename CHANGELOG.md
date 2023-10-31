@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.3] - 2023-10-31
+
+### Changed
+
+- Heatmaps cubes no longer cast or receive shadows.
+- Heatmap cubes are static geometry, a little bit nicer for performance!
+
+### Fixed
+
+- Rendered Heatmap cubes no longer have colliders attached. No more bumping!
+- Temporary Heatmap materials should be correctly destroyed when regenerating heatmaps.
+
 ## [0.4.2] - 2023-10-31
 
 ### Fixed

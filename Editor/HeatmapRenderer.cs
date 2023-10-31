@@ -120,10 +120,17 @@ public class HeatmapRenderer : MonoBehaviour
         }
         return result;
     }
-
+    private static void ClearMaterials()
+    {
+        foreach(KeyValuePair<string,Material> kvp in m_Materials)
+        {
+            DestroyImmediate(kvp.Value);
+        }
+        m_Materials.Clear();
+    }
     public static void RenderEventData()
     {
-        m_Materials.Clear();
+        ClearMaterials();
         for (int i=0; i < m_EventPositions.Count; i++)
         {
             Color c = m_EventColors[i];
@@ -142,6 +149,12 @@ public class HeatmapRenderer : MonoBehaviour
             go.name = m_EventNames[i];
             go.transform.parent = m_Parent;
             go.transform.localPosition = m_EventPositions[i];
+            go.isStatic = true;
+            r.shadowCastingMode = ShadowCastingMode.Off;
+            r.receiveShadows = false;
+            r.lightProbeUsage = LightProbeUsage.Off;
+            r.reflectionProbeUsage = ReflectionProbeUsage.Off;
+            DestroyImmediate(go.GetComponent<Collider>());
         }
     }
 
