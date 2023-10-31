@@ -1,6 +1,6 @@
 {
   "name": "com.abertay.analytics",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "displayName": "Abertay Analytics",
   "description": "This package obfuscates some of the additional functionality of Unity Analytics and provides wrapper functions that allow the developer to send JSON data to a local file at the same time as Unity Analytics.\n\nTo install, simply download the .unitypackage at the link above and double click it while your project is open.",
   "unity": "2020.3",
