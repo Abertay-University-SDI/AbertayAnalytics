@@ -16,16 +16,14 @@ public class AnalyticTester : MonoBehaviour
     /// <summary>
     /// Simulates a standard Custom Event call with parameters. This is designed for Abertay or Unity Analytics
     /// </summary>
-    [ContextMenu("Send event")] void SendEventUnityAnalyticsStyle()
+    [ContextMenu("Send event")] public void SendEventUnityAnalyticsStyle()
     {
         // Send custom event
         Dictionary<string, object> parameters = new Dictionary<string, object>()
         {
             { "healthRemaining",  Random.Range(0,1000) },
             { "timeRemaining",  Random.Range(0,1000) },
-            { "powerLevel",  Random.Range(0,1000) },
-            { "characterName", "Mario" },
-            { "isCool", false }
+            { "characterName", "Mario" }
         };
         AnalyticsManager.SendCustomEvent("LevelComplete", parameters);
     }

@@ -6,7 +6,6 @@ using UnityEngine.SceneManagement;
 
 public class UserIDGetter : MonoBehaviour
 {
-    [SerializeField] private bool m_ChangeSceneOnSubmission = false;
     [SerializeField] private string m_NextSceneName = "";
     [Space]
 
@@ -22,10 +21,14 @@ public class UserIDGetter : MonoBehaviour
 
     public void SubmitHandler()
     {
-        if(m_ChangeSceneOnSubmission)
-            Abertay.Analytics.AnalyticsManager.InitialiseWithCustomID(m_InputField.text, m_EnvironmentName, OnAnalyticsInitialised);
+        if(m_NextSceneName == "")
+        {
+            Debug.LogError("No scene has been specified to move to. Please set this in the inspector!\nAnalytics has not yet been initialised!");
+        }
         else
-            Abertay.Analytics.AnalyticsManager.InitialiseWithCustomID(m_InputField.text, m_EnvironmentName, null);
+        {
+            Abertay.Analytics.AnalyticsManager.InitialiseWithCustomID(m_InputField.text, m_EnvironmentName, OnAnalyticsInitialised);
+        }
     }
 
     private void OnAnalyticsInitialised()

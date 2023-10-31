@@ -1,8 +1,8 @@
 {
   "name": "com.abertay.analytics",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "displayName": "Abertay Analytics",
-  "description": "This package obfuscates some of the additional functionality of Unity Analytics and GameAnalytics and provides wrapper functions that allow the developer to send JSON data to a local file at the same time as Unity Analytics and/or GameAnalytics.\n\nTo make this work you will also need to install GameAnalytics from the following link:\n\nhttps://drive.google.com/file/d/1evR-AKeqjRE_9-amH88ab8wB4e46xpEb/view?usp=share_link \n\nTo install, simply download the .unitypackage at the link above and double click it while your project is open.\n\tPlease note: This is a custom package of GameAnalytics set up to work correctly with AbertayAnalytics. Don't just download the latest  version from the GameAnalytics website.",
+  "description": "This package obfuscates some of the additional functionality of Unity Analytics and provides wrapper functions that allow the developer to send JSON data to a local file at the same time as Unity Analytics.\n\nTo install, simply download the .unitypackage at the link above and double click it while your project is open.",
   "unity": "2020.3",
   "dependencies": {
     "com.unity.nuget.newtonsoft-json": "3.0.2",

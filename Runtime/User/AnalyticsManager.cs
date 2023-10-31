@@ -1,4 +1,5 @@
-#define GAMEANALYTICS //Uncomment this if you want to use Game Analytics
+//#define GAMEANALYTICS //Game Analytics is no longer supported. Removing this will break the plugin
+                        //Kept in case we want to bring it back
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -21,11 +22,10 @@ namespace Abertay.Analytics
 
         //Serialized
         [Tooltip("If you don't initialise this on Start, you need to do this yourself or it won't work!")]
-        [SerializeField] private bool m_InitialiseOnStart = true;
-            [Header("--Analytic Systems--")]
-            [Space(30)]
-        [SerializeField] private bool m_AbertayAnalytics = true;
-        [SerializeField] private bool m_UnityAnalytics = false;
+        [SerializeField] private bool m_InitialiseOnStart   = true;
+        [Header("--Analytic Systems--")]
+        [SerializeField] private bool m_AbertayAnalytics    = true;
+        [SerializeField] private bool m_UnityAnalytics      = false;
 #if GAMEANALYTICS
         [SerializeField] private bool m_GameAnalytics = false;
 #endif
@@ -86,20 +86,27 @@ namespace Abertay.Analytics
         {
             if (!Initialised && m_InitialiseOnStart)
             {
-                foreach(KeyValuePair<AnalyticSystem, IAnalytics> pair in m_AnalyticStack)
-                    pair.Value.Initialise(() => { Initialised = true; }, m_EnvironmentName);                
+                Instance.Init();
             }
         }
         public static void Initialise(string environmentName = "")
         {
             if (!Initialised)
             {
-                foreach (KeyValuePair<AnalyticSystem, IAnalytics> pair in Instance.m_AnalyticStack)
-                    pair.Value.Initialise(() => { Initialised = true; }, environmentName);
+                Instance.Init(environmentName);
             }
             else
             {
-                Debug.LogError("Attempting to initialise an already initialised system.");
+                Debug.LogWarning("Attempting to initialise an already initialised system.");
+            }
+        }
+        private void Init(string environmentName = "")
+        {
+            //TODO: initialised is set as true when *any* of the Analytics Systems are initialised
+            //      should only be true if they are *all* successful
+            foreach (KeyValuePair<AnalyticSystem, IAnalytics> pair in Instance.m_AnalyticStack)
+            {
+                pair.Value.Initialise(() => { Initialised = true; }, environmentName);
             }
         }
         public static void InitialiseWithCustomID(string customID, string environmentName = "", System.Action callback = null)
@@ -107,11 +114,18 @@ namespace Abertay.Analytics
             if (!Initialised)
             {
                 foreach (KeyValuePair<AnalyticSystem, IAnalytics> pair in Instance.m_AnalyticStack)
-                    pair.Value.InitialiseWithCustomID(customID, () => { Initialised = true; if (callback != null) callback(); }, environmentName);
+                {
+                    pair.Value.InitialiseWithCustomID(customID, () => { 
+                            Initialised = true; 
+                            if (callback != null) 
+                                callback(); 
+                        }, 
+                        environmentName);
+                }
             }
             else
             {
-                Debug.LogError("Attempting to initialise an already initialised system.");
+                Debug.LogWarning("Attempting to initialise an already initialised system.");
             }
         }
        
@@ -120,10 +134,19 @@ namespace Abertay.Analytics
             if (Initialised)
             {
                 foreach (KeyValuePair<AnalyticSystem, IAnalytics> pair in Instance.m_AnalyticStack)
+                {
                     pair.Value.SendCustomEvent(eventName, parameters, GA_Value);
+                }
             }
             else
+            {
                 Debug.LogError("Attempting to send a custom event without initialising first.\nDid you forget to call Initialise?");
+            }
+        }
+
+        public static void LogHeatmapEvent(string eventName, Vector3 _pos, Color eventColor)
+        {
+            DataRecorder.RecordEventPosition( eventName, _pos, eventColor );
         }
     }
 }
