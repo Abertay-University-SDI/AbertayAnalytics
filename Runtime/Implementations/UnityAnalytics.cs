@@ -6,6 +6,7 @@ using Unity.Services.Core.Analytics;
 using Unity.Services.Core.Environments;
 using Unity.Services.Analytics;
 using System;
+using Codice.CM.Client.Differences.Merge;
 
 namespace Abertay.Analytics
 {
@@ -13,21 +14,16 @@ namespace Abertay.Analytics
     {
         async void IAnalytics.Initialise(Action callback, string environmentName)
         {
-            try
-            {
-                Debug.Log("Initialising Unity Analytics");
-                InitializationOptions options = new InitializationOptions();
+            Debug.Log("Initialising Unity Analytics");
+            InitializationOptions options = new InitializationOptions();
 
-                if(environmentName.Length > 0)
-                    options.SetEnvironmentName(environmentName);
+            if(environmentName.Length > 0)
+                options.SetEnvironmentName(environmentName);
 
-                await UnityServices.InitializeAsync(options);
-                List<string> consentIdentifiers = await AnalyticsService.Instance.CheckForRequiredConsents();
-            }
-            catch (ConsentCheckException e)
-            {
-                //TODO: actually deal with this...
-            }
+            await UnityServices.InitializeAsync(options);
+
+            AnalyticsService.Instance.StartDataCollection();
+            
 
             Debug.Log("Unity Analytics initialised");
             if (callback != null)
@@ -37,29 +33,24 @@ namespace Abertay.Analytics
         //TODO: Duplication here isn't great
         async void IAnalytics.InitialiseWithCustomID(string userID, Action callback, string environmentName)
         {
-            try
-            {
-                Debug.Log("Initialising Unity Analytics w/ Custom ID");
-                InitializationOptions options = new InitializationOptions();
+            Debug.Log("Initialising Unity Analytics w/ Custom ID");
+            InitializationOptions options = new InitializationOptions();
 
-                if (environmentName.Length > 0)
-                    options.SetEnvironmentName(environmentName);
-                if (userID.Length > 0)
-                {
-                    options.SetAnalyticsUserId(userID);
-                }
-                else
-                {
-                    Debug.LogWarning("Supplied User ID was empty. Using default Unity ID for this device instead.");
-                }
-
-                await UnityServices.InitializeAsync(options);
-                List<string> consentIdentifiers = await AnalyticsService.Instance.CheckForRequiredConsents();
-            }
-            catch (ConsentCheckException e)
+            if (environmentName.Length > 0)
+                options.SetEnvironmentName(environmentName);
+            if (userID.Length > 0)
             {
-                //TODO: actually deal with this...
+                SetUserID(userID);
+                //options.SetAnalyticsUserId(userID);
             }
+            else
+            {
+                Debug.LogWarning("Supplied User ID was empty. Using default Unity ID for this device instead.");
+            }
+
+            await UnityServices.InitializeAsync(options);
+
+            AnalyticsService.Instance.StartDataCollection();
 
             Debug.Log("Unity Analytics initialised w/ Custom ID");
             if (callback != null)
@@ -71,6 +62,11 @@ namespace Abertay.Analytics
             // The ‘myEvent’ event will get queued up and sent every minute
             AnalyticsService.Instance.CustomData(eventName, parameters);
             AnalyticsService.Instance.Flush();  //Technically don't need to do this...
+        }
+
+        public void SetUserID(string userID)
+        {
+            UnityServices.ExternalUserId = userID;
         }
 #if GAMEANALYTICS
         void IAnalytics.SendCustomEvent(string eventName, Dictionary<string, object> parameters, float GA_Value = 0.0f)

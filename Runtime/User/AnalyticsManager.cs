@@ -86,13 +86,14 @@ namespace Abertay.Analytics
         {
             if (!Initialised && m_InitialiseOnStart)
             {
-                Instance.Init();
+                Instance.Init(m_EnvironmentName);
             }
         }
         public static void Initialise(string environmentName = "")
         {
             if (!Initialised)
             {
+                Instance.m_EnvironmentName = environmentName;
                 Instance.Init(environmentName);
             }
             else

@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using Newtonsoft.Json;
 using System.Globalization;
+using UnityEditor;
+using UnityEngine.SceneManagement;
 
 namespace Abertay.Analytics
 {
@@ -12,7 +14,6 @@ namespace Abertay.Analytics
     {
         private string m_UserID = "NULL";
         private string m_Environment = "";
-        System.Action initCallback = null;
 
         /// <summary>
         /// The environment name can be used to specify a different file name
@@ -25,10 +26,14 @@ namespace Abertay.Analytics
                 m_Environment = environmentName;
             if (m_UserID.Length < 1)
             {
-                m_UserID = System.Guid.NewGuid().ToString();
-                PlayerPrefs.SetString("UserID", m_UserID.ToString());
+                SetUserID(System.Guid.NewGuid().ToString());
             }
-            CreateDirectory(Application.persistentDataPath + "/Analytics");
+#if UNITY_EDITOR
+            string path = Application.dataPath;
+#else
+        string path = Application.dataPath + "/..";
+#endif
+            CreateDirectory(path + "/Analytics/Events");
             callback();
         }
 
@@ -50,17 +55,25 @@ namespace Abertay.Analytics
         /// <param name="environmentName"></param>
         void IAnalytics.InitialiseWithCustomID(string userID, Action callback, string environmentName)
         {
-            m_UserID = userID;
             if (environmentName.Length > 0)
                 m_Environment = environmentName;
-            if (!(m_UserID.Length > 0)) {            
+            if (!(userID.Length > 0)) {            
                 Debug.LogError("Trying to use a custom ID of an empty string. Setting to NULL");
-                m_UserID = "NULL";
+                SetUserID("NULL");
             }
-            CreateDirectory(Application.persistentDataPath + "/Analytics");
+            else
+            {
+                SetUserID(userID);
+            }
+#if UNITY_EDITOR
+            string path = Application.dataPath + "/Analytics/Events";
+#else
+            string path = Application.dataPath + "/../Analytics/Events";
+#endif
+            CreateDirectory(path);
             callback();
         }
-
+        //TODO: This could be way more efficient
         public void SendCustomEvent(string eventName, Dictionary<string, object> parameters, float GA_Value)
         {
             //Build custom event structure
@@ -75,8 +88,14 @@ namespace Abertay.Analytics
             customEvent.GA_Value = GA_Value;
             customEvent.eventParams = parameters;
 
-            string fileName = "/Analytics/Event" + (m_Environment.Length > 0 ? ("_" + m_Environment):("")) + ".json";
-            string path = Application.persistentDataPath + fileName;
+            string fileName = "/Analytics/Events/Events" + (m_Environment.Length > 0 ? ("_" + m_Environment):("")) + ".json";
+
+#if UNITY_EDITOR
+            string path = Application.dataPath;
+#else
+        string path = Application.dataPath + "/..";
+#endif
+        path +=  fileName;
 
             //Load all events currently saved to disk
             List<CustomEvent> events = new List<CustomEvent>();
@@ -102,6 +121,15 @@ namespace Abertay.Analytics
                 Debug.LogError("Failed to save JSON data to: " + path);
                 Debug.LogError("Error " + e.Message);
             }
+#if UNITY_EDITOR
+            AssetDatabase.Refresh();
+#endif
+        }
+
+        public void SetUserID(string userId)
+        {
+            m_UserID = userId;
+            PlayerPrefs.SetString("UserID", m_UserID);
         }
 #if GAMEANALYTICS
         void IAnalytics.SendCustomEvent(string eventName, Dictionary<string, object> parameters, float GA_Value = 0.0f)
