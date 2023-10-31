@@ -130,13 +130,13 @@ namespace Abertay.Analytics
             }
         }
        
-        public static void SendCustomEvent(string eventName, Dictionary<string, object> parameters, float GA_Value = -1)
+        public static void SendCustomEvent(string eventName, Dictionary<string, object> parameters)
         {
             if (Initialised)
             {
                 foreach (KeyValuePair<AnalyticSystem, IAnalytics> pair in Instance.m_AnalyticStack)
                 {
-                    pair.Value.SendCustomEvent(eventName, parameters, GA_Value);
+                    pair.Value.SendCustomEvent(eventName, parameters);
                 }
             }
             else

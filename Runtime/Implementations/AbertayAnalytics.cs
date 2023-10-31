@@ -74,7 +74,7 @@ namespace Abertay.Analytics
             callback();
         }
         //TODO: This could be way more efficient
-        public void SendCustomEvent(string eventName, Dictionary<string, object> parameters, float GA_Value)
+        public void SendCustomEvent(string eventName, Dictionary<string, object> parameters)
         {
             //Build custom event structure
             CustomEvent customEvent = new CustomEvent();
@@ -85,23 +85,26 @@ namespace Abertay.Analytics
             customEvent.userID = m_UserID;
             customEvent.eventName = eventName;
             customEvent.eventUUID = Hash128.Compute(eventName + customEvent.eventTimestamp + customEvent.userID).ToString(); //TODO: something better than this?
-            customEvent.GA_Value = GA_Value;
             customEvent.eventParams = parameters;
 
-            string fileName = "/Analytics/Events/Events" + (m_Environment.Length > 0 ? ("_" + m_Environment):("")) + ".json";
+            string JSONfileName = "/Analytics/Events/Events" + (m_Environment.Length > 0 ? ("_" + m_Environment):("")) + ".json";
+            string CSVfileName = "/Analytics/Events/Events" + (m_Environment.Length > 0 ? ("_" + m_Environment) : ("")) + ".csv";
 
 #if UNITY_EDITOR
             string path = Application.dataPath;
 #else
         string path = Application.dataPath + "/..";
 #endif
-        path +=  fileName;
+            string CSVpath  = path + JSONfileName;
+            string JSONpath = path + JSONfileName;
+
+            //TODO: CSV export
 
             //Load all events currently saved to disk
             List<CustomEvent> events = new List<CustomEvent>();
-            if (File.Exists(path))
+            if (File.Exists(JSONpath))
             {
-                events = JsonConvert.DeserializeObject<List<CustomEvent>>(File.ReadAllText(@path));
+                events = JsonConvert.DeserializeObject<List<CustomEvent>>(File.ReadAllText(@JSONpath));
             }
             //Add the new event
             events.Add(customEvent);
@@ -114,11 +117,11 @@ namespace Abertay.Analytics
             try
             {
                 // save data here
-                File.WriteAllBytes(path, byteData);
+                File.WriteAllBytes(JSONpath, byteData);
             }
             catch (Exception e)
             {
-                Debug.LogError("Failed to save JSON data to: " + path);
+                Debug.LogError("Failed to save JSON data to: " + JSONpath);
                 Debug.LogError("Error " + e.Message);
             }
 #if UNITY_EDITOR

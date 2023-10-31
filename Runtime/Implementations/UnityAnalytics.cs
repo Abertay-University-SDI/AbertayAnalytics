@@ -6,7 +6,6 @@ using Unity.Services.Core.Analytics;
 using Unity.Services.Core.Environments;
 using Unity.Services.Analytics;
 using System;
-using Codice.CM.Client.Differences.Merge;
 
 namespace Abertay.Analytics
 {
@@ -57,7 +56,7 @@ namespace Abertay.Analytics
                 callback();
         }
 
-        public void SendCustomEvent(string eventName, Dictionary<string, object> parameters, float GA_Value)
+        public void SendCustomEvent(string eventName, Dictionary<string, object> parameters)
         {
             // The ‘myEvent’ event will get queued up and sent every minute
             AnalyticsService.Instance.CustomData(eventName, parameters);
