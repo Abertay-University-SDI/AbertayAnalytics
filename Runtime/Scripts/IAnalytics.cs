@@ -15,6 +15,8 @@ namespace Abertay.Analytics
         public void SendCustomEvent(string eventName, Dictionary<string, object> parameters);
 
         public void SetUserID(string userID);
+
+        public void OnQuit();
 #if GAMEANALYTICS
         /// <summary>
         /// This version of the function call is only necessary when using Game Analytics.

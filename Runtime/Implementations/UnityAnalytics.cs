@@ -67,6 +67,11 @@ namespace Abertay.Analytics
         {
             UnityServices.ExternalUserId = userID;
         }
+
+        public void OnQuit()
+        {
+
+        }
 #if GAMEANALYTICS
         void IAnalytics.SendCustomEvent(string eventName, Dictionary<string, object> parameters, float GA_Value = 0.0f)
         {

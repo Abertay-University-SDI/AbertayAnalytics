@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] - 2023-11-28
+
+###Changed
+
+- Saving is now handled Asyncronously. No more stalling when you log events!
+
 ## [0.5.0] - 2023-10-31
 
 ###Added

@@ -149,5 +149,14 @@ namespace Abertay.Analytics
         {
             DataRecorder.RecordEventPosition( eventName, _pos, eventColor );
         }
+
+        private void OnDestroy()
+        {
+        }
+
+        public void OnApplicationQuit()
+        {
+
+        }
     }
 }
