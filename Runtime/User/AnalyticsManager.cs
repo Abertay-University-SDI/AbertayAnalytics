@@ -1,8 +1,12 @@
 //#define GAMEANALYTICS //Game Analytics is no longer supported. Removing this will break the plugin
-                        //Kept in case we want to bring it back
+//Kept in case we want to bring it back
 using System.Collections;
 using System.Collections.Generic;
+using System.Net;
+using System.Security.Cryptography;
+using UnityEditor;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Abertay.Analytics
 {
@@ -33,6 +37,17 @@ namespace Abertay.Analytics
             [Space(30)]
         [Tooltip("This is an optional parameter. Leave it blank unless you want a custom environment.")]
         [SerializeField] private string m_EnvironmentName = "";
+
+        [Header("Heatmap")]
+        [SerializeField] private TextAsset m_CurrentHeatmap = null;
+        private TextAsset m_LastHeatmap = null;
+        [SerializeField] private bool m_ShowHeatmap = false;
+        [SerializeField][Range(0.0f, 1.0f)] private float m_GizmoOpacity = 0.5f;
+        [SerializeField][Range(0.0f, 1.0f)] private float m_GizmoSize = 0.5f;
+        private static List<string> m_EventNames = new List<string>();
+        private static List<Vector3> m_EventPositions = new List<Vector3>();
+        private static List<Color> m_EventColors = new List<Color>();
+        private float alpha = 1.0f;
 
 #if GAMEANALYTICS
         //Getter
@@ -156,7 +171,126 @@ namespace Abertay.Analytics
 
         public void OnApplicationQuit()
         {
+            if (Initialised)
+            {
+                foreach (KeyValuePair<AnalyticSystem, IAnalytics> pair in Instance.m_AnalyticStack)
+                {
+                    pair.Value.OnQuit();
+                }
 
+
+#if UNITY_EDITOR
+                ////Re-import the file to update the reference in the editor
+                AssetDatabase.ImportAsset(DataRecorder.FilePath);
+                TextAsset asset = Resources.Load<TextAsset>(DataRecorder.FilePath);
+#endif
+            }
+        }
+
+        private void OnValidate()
+        {
+            bool failure = false;
+            if (m_CurrentHeatmap != null && m_CurrentHeatmap != m_LastHeatmap)
+            {
+                m_EventNames.Clear();
+                m_EventPositions.Clear();
+                m_EventColors.Clear();
+
+                string file = m_CurrentHeatmap.text;
+                string[] lines = file.Split('\n');
+                if (lines.Length > 0)
+                {
+                    foreach (string line in lines)
+                    {
+                        if (line.Length > 0)
+                        {
+                            if (line[0] == '#')
+                            {
+                                string scene = line.Substring(1);
+                                scene = scene.Replace("\r\n", "").Replace("\r", "").Replace("\n", "");
+                                string currentScene = SceneManager.GetActiveScene().name;
+                                if (scene != currentScene)
+                                {
+                                    Debug.LogWarning("Scene name in heatmap file ("+ scene +") does not match active scene (" + currentScene + ")\n" +
+                                        $"It looks like this might be a heatmap for another scene, or the scene has been renamed.");
+                                }
+                                continue;
+                            }
+                            //going through the text file line by line and adding it to a list of vectors.
+                            string[] splitString = line.Split(':');
+                            if (splitString.Length != 3)
+                            {
+                                failure = true;
+                                break;
+                            }
+                            m_EventNames.Add(splitString[0]);
+                            m_EventPositions.Add(stringToVec(splitString[1]));
+                            m_EventColors.Add(stringToCol(splitString[2]));
+                        }
+                    }
+                    if (m_EventNames.Count == 0)
+                    {
+                        failure = true;
+                    }
+                }
+                if(failure)
+                {
+                    Debug.LogError("That's not a valid Heatmap file!");
+                    m_CurrentHeatmap = null;
+                }
+            }
+            if(failure || m_CurrentHeatmap == null)
+            {
+                m_EventNames.Clear();
+                m_EventPositions.Clear();
+                m_EventColors.Clear();
+            }
+            m_LastHeatmap = m_CurrentHeatmap;
+        }
+
+        private void OnDrawGizmos()
+        {
+            if (m_ShowHeatmap && m_GizmoOpacity > 0.0f)
+            {
+                Vector3 p;
+                Vector3 s = Vector3.one * 0.5f;
+                Color c = Color.green;
+                c.a = m_GizmoOpacity;
+                for (int i=0; i < m_EventNames.Count; i++)
+                {
+                    c = m_EventColors[i];
+                    c.a *= m_GizmoOpacity;
+                    Gizmos.color = c;
+                    //c.a = m_GizmoOpacity;
+                    p = m_EventPositions[i];
+                    Gizmos.DrawSphere(p, m_GizmoSize);
+                }
+            }
+        }
+        public static Vector3 stringToVec(string _st)
+        {
+            Vector3 result = new Vector3();
+            _st = _st.Replace("(", string.Empty);
+            _st = _st.Replace(")", string.Empty);
+            string[] vals = _st.Split(',');
+            if (vals.Length == 3)
+            {
+                result.Set(float.Parse(vals[0]), float.Parse(vals[1]), float.Parse(vals[2]));
+            }
+            return result;
+        }
+        public static Color stringToCol(string _st)
+        {
+            Color result = Color.magenta;
+            _st = _st.Replace("(", string.Empty);
+            _st = _st.Replace(")", string.Empty);
+            string[] vals = _st.Split(',');
+            if (vals.Length == 4)
+            {
+                result = new Color(float.Parse(vals[0]), float.Parse(vals[1]), float.Parse(vals[2]), float.Parse(vals[3]));
+            }
+            return result;
         }
     }
+
 }

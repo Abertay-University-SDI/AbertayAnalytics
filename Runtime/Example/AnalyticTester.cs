@@ -5,6 +5,7 @@ using Abertay.Analytics;
 
 public class AnalyticTester : MonoBehaviour
 {
+    public Transform mover;
     private void Start()
     {
         //If the Analytic Manager isn't set to initialise on Start you can initialise it here
@@ -23,7 +24,8 @@ public class AnalyticTester : MonoBehaviour
         {
             { "healthRemaining",  Random.Range(0,1000) },
             { "timeRemaining",  Random.Range(0,1000) },
-            { "characterName", "Mario" }
+            { "characterName", "Mario" },
+            {"position", mover.position.ToString() }
         };
         AnalyticsManager.SendCustomEvent("LevelComplete", parameters);
     }
@@ -35,9 +37,12 @@ public class AnalyticTester : MonoBehaviour
         {
             { "someFloat",  Random.Range(0.0f,100.0f) },
             { "timeRemaining",  Random.Range(0,1000) },
-            { "otherName", "Luigi" }
+            { "otherName", "Luigi" },
+            {"position", mover.position.ToString() }
         };
         AnalyticsManager.SendCustomEvent("WorldComplete", parameters);
+
+        AnalyticsManager.LogHeatmapEvent("CustEvent", mover.position, Color.green);
     }
 
 #if GAMEANALYTICS

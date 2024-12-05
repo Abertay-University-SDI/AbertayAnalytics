@@ -1,3 +1,5 @@
+//#define DEBUGGING
+
 using System;
 using System.IO;
 using System.Collections;
@@ -8,6 +10,7 @@ using System.Globalization;
 using UnityEditor;
 using UnityEngine.SceneManagement;
 using System.Threading.Tasks;
+using System.ComponentModel;
 
 namespace Abertay.Analytics
 {
@@ -94,14 +97,14 @@ namespace Abertay.Analytics
         private void Load()
         {
             string JSONfileName = "/Analytics/Events/Events" + (m_Environment.Length > 0 ? ("_" + m_Environment) : ("")) + "_JSON.json";
-            string CSVfileName = "/Analytics/Events/Events" + (m_Environment.Length > 0 ? ("_" + m_Environment) : ("")) + "_CSV.csv";
+            //string CSVfileName = "/Analytics/Events/Events" + (m_Environment.Length > 0 ? ("_" + m_Environment) : ("")) + "_CSV.csv";
 
 #if UNITY_EDITOR
             string path = Application.dataPath;
 #else
         string path = Application.dataPath + "/..";
 #endif
-            string CSVpath = path + CSVfileName;
+            //string CSVpath = path + CSVfileName;
             string JSONpath = path + JSONfileName;
 
             //Load all events currently saved to disk
@@ -114,6 +117,10 @@ namespace Abertay.Analytics
 #pragma warning disable CS1998 // Ignore Async warning
         private async void Save()
         {
+            bool success = false;
+#if DEBUGGING
+            Debug.Log("Saving...");
+#endif
             string JSONfileName = "/Analytics/Events/Events" + (m_Environment.Length > 0 ? ("_" + m_Environment) : ("")) + "_JSON.json";
             string CSVfileName = "/Analytics/Events/Events" + (m_Environment.Length > 0 ? ("_" + m_Environment) : ("")) + "_CSV.csv";
 
@@ -124,65 +131,98 @@ namespace Abertay.Analytics
 #endif
             string CSVpath = path + CSVfileName;
             string JSONpath = path + JSONfileName;
-
-            File.WriteAllText(CSVpath, "");
-            using (StreamWriter sw = File.AppendText(CSVpath))
-            {
-                HashSet<string> keys = new HashSet<string>();
-                foreach (CustomEvent ce in events)
-                {
-                    foreach (KeyValuePair<string, object> kvp in ce.eventParams)
-                    {
-                        keys.Add(kvp.Key);
-                    }
-                }
-                string header = "Timestamp,UserID,Event Name,UUID";
-                foreach (string s in keys)
-                {
-                    header += ",Param/" + s;
-                }
-                sw.WriteLine(header);
-                string line = "";
-
-                foreach (CustomEvent ce in events)
-                {
-                    //log core info
-                    line = ce.eventTimestamp + "," + ce.userID + "," + ce.eventName + "," + ce.eventUUID;
-                    foreach (string s in keys)
-                    {
-                        if (ce.eventParams.ContainsKey(s))
-                        {
-                            line += "," + ce.eventParams[s];
-                        }
-                        else
-                        {
-                            line += ",";
-                        }
-                    }
-                    sw.WriteLine(line);
-                }
-                sw.Close();
-            }
-
-            string jsonData = JsonConvert.SerializeObject(events, Formatting.Indented);
-
-            byte[] byteData;
-            byteData = System.Text.Encoding.ASCII.GetBytes(jsonData);
-            // attempt to save event
             try
             {
-                // save data here
-                File.WriteAllBytes(JSONpath, byteData);
+                File.WriteAllText(CSVpath, "");
+            
+                using (StreamWriter sw = File.AppendText(CSVpath))
+                {
+#if DEBUGGING
+                    Debug.Log("Entering CSV...");
+#endif
+                    HashSet<string> keys = new HashSet<string>();
+                    foreach (CustomEvent ce in events)
+                    {
+                        foreach (KeyValuePair<string, object> kvp in ce.eventParams)
+                        {
+                            keys.Add(kvp.Key);
+                        }
+                    }
+                    string header = "Timestamp,UserID,Event Name,UUID";
+                    foreach (string s in keys)
+                    {
+                        header += "," + s;
+                    }
+                    sw.WriteLine(header);
+                    string line = "";
+                    string param = "";
+                    foreach (CustomEvent ce in events)
+                    {
+                        //log core info
+                        line = ce.eventTimestamp + "," + ce.userID + "," + ce.eventName + "," + ce.eventUUID;
+                        foreach (string s in keys)
+                        {
+                            if (ce.eventParams.ContainsKey(s))
+                            {
+                                //TODO: Check for "
+                                param = ce.eventParams[s].ToString();
+                                if (param.Contains(","))
+                                {
+                                    param = "\"" + param + "\"";
+                                }
+                                line += "," + param;
+                            }
+                            else
+                            {
+                                line += ",";
+                            }
+                        }
+                        sw.WriteLine(line);
+                    }
+                    sw.Close();
+                }
+#if DEBUGGING
+                Debug.Log("CSV save complete...");
+#endif
             }
-            catch (Exception e)
+            catch(IOException e)
             {
-                Debug.LogError("Failed to save JSON data to: " + JSONpath);
-                Debug.LogError("Error " + e.Message);
+                //Debug.LogException(e);
+                Debug.LogError("Failed to save CSV file. Do you have it open in another program?");
             }
+#if DEBUGGING
+            Debug.Log("Starting JSON save...");
+#endif
+            string jsonData = "";
+            try
+            {
+                jsonData = JsonConvert.SerializeObject(events, Formatting.Indented);
+            }
+            catch(Exception e)
+            {
+                Debug.LogError("Failed to serialise events to JSON\nError: " + e.Message );
+            }
+            if (jsonData != null && jsonData.Length > 0)
+            {
+                byte[] byteData;
+                byteData = System.Text.Encoding.ASCII.GetBytes(jsonData);
+                // attempt to save event
+                try
+                {
+                    // save data here
+                    File.WriteAllBytes(JSONpath, byteData);
+                    success = true;
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError("Failed to save JSON data to: " + JSONpath);
+                    Debug.LogError("Error " + e.Message);
+                }
+            }
+            isDirty = !success;
 
-            isDirty = false;
-#if UNITY_EDITOR
-            AssetDatabase.Refresh();
+#if DEBUGGING
+            Debug.Log("Save complete...");
 #endif
         }
 #pragma warning restore CS1998 // Ignore Async warning
@@ -231,6 +271,9 @@ namespace Abertay.Analytics
             {
                 Save();
             }
+#if UNITY_EDITOR
+            AssetDatabase.Refresh();
+#endif
         }
     }
 }

@@ -20,6 +20,7 @@ public class HeatmapRenderer : MonoBehaviour
     [MenuItem("Tools/Heatmap/Generate Heatmap Render", false, 10)]
     public static void ReadEventData()
     {
+        Debug.LogWarning("This function is deprecated. You should instead use the Heatmap gizmo functionality on the Analytics Manager prefab.");
         m_path = "Assets/Resources/Heatmaps/" + SceneManager.GetActiveScene().name + "/";
 
         m_HeatmapMaterial = Resources.Load<Material>("HeatmapMaterial");
@@ -39,6 +40,8 @@ public class HeatmapRenderer : MonoBehaviour
             StreamReader reader = new StreamReader(fullPath);
             while ((eventCoords = reader.ReadLine()) != null)
             {
+                if (eventCoords[0] == '#')
+                    continue;
                 //going through the text file line by line and adding it to a list of vectors.
                 string[] splitString = eventCoords.Split(':');
                 m_EventNames.Add(splitString[0]);
@@ -72,6 +75,7 @@ public class HeatmapRenderer : MonoBehaviour
 
         string[] files = Directory.GetFiles(m_path, "*.txt");
         string[] metaFiles = Directory.GetFiles(m_path, "*.meta");
+        bool writeFileName = true;
         foreach (string file in files)
         {
             string fullPath = file; //Creates and uses a file per scence. This application uses your scene name to generate death textfile. 
@@ -81,6 +85,8 @@ public class HeatmapRenderer : MonoBehaviour
             StreamReader reader = new StreamReader(fullPath);
             while ((eventCoords = reader.ReadLine()) != null)
             {
+                if (eventCoords[0] == '#' && !writeFileName)
+                    continue;
                 totalString += eventCoords + "\n";
             }
             reader.Close();
