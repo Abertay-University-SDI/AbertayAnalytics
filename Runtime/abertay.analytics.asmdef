@@ -2,7 +2,6 @@
     "name": "abertay.analytics",
     "rootNamespace": "",
     "references": [
-        "GA",
         "Unity.Services.Core",
         "Unity.Services.Core.Analytics",
         "Unity.Services.Analytics",

@@ -29,12 +29,14 @@ namespace Abertay.Analytics
         [SerializeField] private bool m_InitialiseOnStart   = true;
         [Header("--Analytic Systems--")]
         [SerializeField] private bool m_AbertayAnalytics    = true;
+#if UNITYANALYTICS
         [SerializeField] private bool m_UnityAnalytics      = false;
+#endif
 #if GAMEANALYTICS
         [SerializeField] private bool m_GameAnalytics = false;
 #endif
 
-            [Space(30)]
+        [Space(30)]
         [Tooltip("This is an optional parameter. Leave it blank unless you want a custom environment.")]
         [SerializeField] private string m_EnvironmentName = "";
 
@@ -78,8 +80,10 @@ namespace Abertay.Analytics
                 DontDestroyOnLoad(gameObject);
                 if (m_AbertayAnalytics)
                     m_AnalyticStack.Add(AnalyticSystem.AbertayAnalytics, new AbertayAnalytics());
+#if UNITYANALYTICS
                 if (m_UnityAnalytics)
                     m_AnalyticStack.Add(AnalyticSystem.UnityAnalytics, new UnityAnalytics());
+#endif
 #if GAMEANALYTICS
                 if (m_GameAnalytics)
                 {

@@ -59,7 +59,8 @@ namespace Abertay.Analytics
         public void SendCustomEvent(string eventName, Dictionary<string, object> parameters)
         {
             // The ‘myEvent’ event will get queued up and sent every minute
-            AnalyticsService.Instance.CustomData(eventName, parameters);
+            //TODO 28/10/25: Fix Unity Analytics hooks
+            //AnalyticsService.Instance.rec(eventName, parameters);
             AnalyticsService.Instance.Flush();  //Technically don't need to do this...
         }
 

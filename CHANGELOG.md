@@ -7,15 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.0] - 2025-10-28
+
+### Changed
+
+- Updated for Unity 6000.0
+
+### Removed
+- Temporarily removed support for Unity Analytics. Since the last update the Analytics API has changed significantly and is no longer compatible with the current design of Abertay Analytics. This will require a larger overhaul at a later date.
+
 ## [0.6.0] - 2023-11-28
 
-###Changed
+### Changed
 
 - Saving is now handled Asyncronously. No more stalling when you log events!
 
 ## [0.5.0] - 2023-10-31
 
-###Added
+### Added
 
 - Abertay Analytics now exports to CSV! Look for it in the Analytics/Events folder
 
