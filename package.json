@@ -1,16 +1,15 @@
 {
   "name": "com.abertay.analytics",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "displayName": "Abertay Analytics",
-  "description": "This package obfuscates some of the additional functionality of Unity Analytics and provides wrapper functions that allow the developer to send JSON data to a local file at the same time as Unity Analytics.\n\nTo install, simply download the .unitypackage at the link above and double click it while your project is open.",
+  "description": "Local Unity playtesting analytics: append events automatically to JSON Lines (.jsonl) and export timestamped CSV reports on demand from the Unity Editor. Includes spatial heatmap logging and visualisation.",
   "unity": "6000.0",
   "dependencies": {
-    "com.unity.nuget.newtonsoft-json": "3.2.2",
-    "com.unity.services.analytics": "6.1.1"
+    "com.unity.nuget.newtonsoft-json": "3.2.2"
   },
   "author": {
     "name": "Gaz Robinson",
-    "email": "g.robinson@abertay.ac.uk",
-    "url": "https://www.abertay.ac.uk"
+    "url": "https://www.abertay.ac.uk",
+    "email": "g.robinson@abertay.ac.uk"
   }
 }

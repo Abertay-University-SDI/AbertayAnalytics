@@ -4,7 +4,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Net;
 using System.Security.Cryptography;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -12,10 +11,6 @@ namespace Abertay.Analytics
 {
     public enum AnalyticSystem
     {
-        UnityAnalytics,
-#if GAMEANALYTICS
-        GameAnalytics,
-#endif
         AbertayAnalytics
     }
     public class AnalyticsManager : MonoBehaviour
@@ -27,14 +22,6 @@ namespace Abertay.Analytics
         //Serialized
         [Tooltip("If you don't initialise this on Start, you need to do this yourself or it won't work!")]
         [SerializeField] private bool m_InitialiseOnStart   = true;
-        [Header("--Analytic Systems--")]
-        [SerializeField] private bool m_AbertayAnalytics    = true;
-#if UNITYANALYTICS
-        [SerializeField] private bool m_UnityAnalytics      = false;
-#endif
-#if GAMEANALYTICS
-        [SerializeField] private bool m_GameAnalytics = false;
-#endif
 
         [Space(30)]
         [Tooltip("This is an optional parameter. Leave it blank unless you want a custom environment.")]
@@ -51,23 +38,6 @@ namespace Abertay.Analytics
         private static List<Color> m_EventColors = new List<Color>();
         private float alpha = 1.0f;
 
-#if GAMEANALYTICS
-        //Getter
-        /// <summary>
-        /// You can use this function to specifically get the GameAnalytics instance.
-        /// This is handy for logging specific GameAnalytic events but still have them go through the Abertay Analytics manager
-        /// </summary>
-        public static GameAnalytics GetGAInstance
-        {
-            get
-            {
-                if (Instance.m_GameAnalytics)
-                    return (GameAnalytics)Instance.m_AnalyticStack[AnalyticSystem.GameAnalytics];
-                else
-                    return null;
-            }
-        }
-#endif
         //private member
         private Dictionary<AnalyticSystem, IAnalytics> m_AnalyticStack;
 
@@ -77,22 +47,9 @@ namespace Abertay.Analytics
             {
                 Instance = this;
                 m_AnalyticStack = new Dictionary<AnalyticSystem, IAnalytics>();
+                m_AnalyticStack.Add(AnalyticSystem.AbertayAnalytics, new AbertayAnalytics());
+                
                 DontDestroyOnLoad(gameObject);
-                if (m_AbertayAnalytics)
-                    m_AnalyticStack.Add(AnalyticSystem.AbertayAnalytics, new AbertayAnalytics());
-#if UNITYANALYTICS
-                if (m_UnityAnalytics)
-                    m_AnalyticStack.Add(AnalyticSystem.UnityAnalytics, new UnityAnalytics());
-#endif
-#if GAMEANALYTICS
-                if (m_GameAnalytics)
-                {
-#if UNITY_EDITOR
-                    Debug.LogWarning("Abertay Analytics warning: GameAnalytics will not send ANYTHING from the editor. You need to do a build to log events with GameAnalytics!");
-#endif
-                    m_AnalyticStack.Add(AnalyticSystem.GameAnalytics, new GameAnalytics());
-                }
-#endif
             }
             else
             {
@@ -164,6 +121,47 @@ namespace Abertay.Analytics
             }
         }
 
+        public static void SetUserID(string newUserID)
+        {
+            foreach (KeyValuePair<AnalyticSystem, IAnalytics> pair in Instance.m_AnalyticStack)
+            {
+                pair.Value.SetUserID(newUserID);
+            }
+        }
+        /// <summary>Flush queued JSON Lines events without ending the session.</summary>
+        public static bool FlushLocalDataForExport()
+        {
+            if (Instance == null || !Initialised || Instance.m_AnalyticStack == null)
+                return true;
+
+            if (Instance.m_AnalyticStack.TryGetValue(AnalyticSystem.AbertayAnalytics, out IAnalytics backend)
+                && backend is AbertayAnalytics local)
+                return local.FlushPendingWrites();
+
+            return true;
+        }
+
+        /// <summary>Get the active local JSONL log, if a session has been initialised.</summary>
+        public static string GetActiveLocalJsonPath()
+        {
+            if (Instance != null && Initialised && Instance.m_AnalyticStack != null
+                && Instance.m_AnalyticStack.TryGetValue(AnalyticSystem.AbertayAnalytics, out IAnalytics backend)
+                && backend is AbertayAnalytics local)
+                return local.JsonFilePath;
+
+            return null;
+        }
+
+        public static string GetCurrentSessionID()
+        {
+            if (Instance != null && Initialised && Instance.m_AnalyticStack != null
+                && Instance.m_AnalyticStack.TryGetValue(AnalyticSystem.AbertayAnalytics, out IAnalytics backend)
+                && backend is AbertayAnalytics local)
+                return local.SessionID;
+
+            return null;
+        }
+
         public static void LogHeatmapEvent(string eventName, Vector3 _pos, Color eventColor)
         {
             DataRecorder.RecordEventPosition( eventName, _pos, eventColor );
@@ -171,6 +169,16 @@ namespace Abertay.Analytics
 
         private void OnDestroy()
         {
+            if (Instance != this)
+                return;
+
+            if (Initialised && m_AnalyticStack != null)
+            {
+                foreach (IAnalytics backend in m_AnalyticStack.Values)
+                    backend.OnQuit();
+            }
+            Initialised = false;
+            Instance = null;
         }
 
         public void OnApplicationQuit()
@@ -185,7 +193,7 @@ namespace Abertay.Analytics
 
 #if UNITY_EDITOR
                 ////Re-import the file to update the reference in the editor
-                AssetDatabase.ImportAsset(DataRecorder.FilePath);
+                UnityEditor.AssetDatabase.ImportAsset(DataRecorder.FilePath);
                 TextAsset asset = Resources.Load<TextAsset>(DataRecorder.FilePath);
 #endif
             }

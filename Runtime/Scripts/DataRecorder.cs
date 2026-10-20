@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor;
 using System.IO;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -92,7 +91,6 @@ namespace Abertay.Analytics
                 sw.Close();
             }
             ////Re-import the file to update the reference in the editor
-            AssetDatabase.ImportAsset(filePath);
             TextAsset asset = Resources.Load<TextAsset>(filePath + ".txt");
             ////Print the text from the file
             result = true;//If we get to this part of our code, this means things went ok, so we return true. 

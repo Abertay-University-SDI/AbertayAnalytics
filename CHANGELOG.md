@@ -7,6 +7,64 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.1] - 2026-10-20
+
+### Added
+
+- New session ID for every manager initialisation, recorded on each event alongside the active scene.
+- `AnalyticsManager.GetCurrentSessionID()` for retrieving the current session ID.
+- Explicit handling and validation for common Unity value types, scalars, lists and dictionaries.
+- CSV columns for session, scene and individual properties of structured parameters.
+
+### Changed
+
+- New event timestamps use ISO 8601 UTC; existing stored timestamps remain untouched.
+- Removed obsolete `GA_Value` from the event model; legacy recordings still load.
+- Reset manager state when destroyed, including when domain reload is disabled.
+
+
+## [0.8.3] - 2026-10-20
+
+### Changed
+
+- Use append-only `.jsonl` event logs instead of continually rewriting a JSON array.
+- Serialize each event on the calling thread before enqueuing; the background worker only writes immutable JSON lines.
+- Coalesce queued events into bounded batches, with ordered retries on I/O failure, a final flush on shutdown, and an explicit flush for live CSV exports.
+- Export menus discover either `.jsonl` or legacy `.json` recordings; `ExportCsvFromJson` supports both formats.
+
+### Added
+
+- One-time, non-destructive migration of older `*_JSON.json` arrays when the corresponding `.jsonl` is first created.
+- Crash-tail recovery: preserve an invalid final fragment in `.partial_*.txt` before truncating it; complete unterminated final JSON objects get a newline.
+- `Vector3` JSON converter to avoid recursively serializing its `normalized` property.
+
+
+## [0.8.2] - 2026-10-20
+
+### Changed
+
+- JSON remains the automatic event log; CSV generation is now explicit instead of performed on every event.
+- Each CSV export uses a new timestamped file under `Assets/Analytics/Exports/` (or an `Exports` folder beside external log directories), so Excel can keep older exports open.
+
+### Added
+
+- `Export CSV` Scene view toolbar overlay (Unity 6.0+) and main-toolbar action (Unity 6.3+).
+- `Tools > Abertay Analytics > Export Latest CSV` and `Export CSV From JSON...` menu actions.
+- Play-mode export flushes pending JSON writes before converting the active session.
+- `AbertayAnalytics.ExportCsvFromJson` public file converter for use outside the Editor.
+
+
+## [0.8.1] - 2026-10-20
+
+### Fixed
+
+- Coalesced background CSV/JSON writes with snapshotting and a synchronous shutdown flush.
+- Removed unguarded UnityEditor imports from runtime source files.
+- Load saved events before invoking analytics initialisation callbacks.
+- Proper CSV escaping for all fields, including quotes and newlines.
+- Generate unique event IDs with GUIDs.
+- Restore saved user IDs or generate and persist a default on first launch.
+
 ## [0.8.0] - 2025-10-28
 
 ### Changed

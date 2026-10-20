@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace Abertay.Analytics
 {
@@ -7,9 +8,12 @@ namespace Abertay.Analytics
     {
         public string eventTimestamp;
         public string userID;
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public string sessionID;
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public string sceneName;
         public string eventName;
         public string eventUUID;
-        public float GA_Value;
         public Dictionary<string, object> eventParams;
     }
 }

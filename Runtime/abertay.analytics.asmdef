@@ -1,12 +1,7 @@
 {
     "name": "abertay.analytics",
     "rootNamespace": "",
-    "references": [
-        "Unity.Services.Core",
-        "Unity.Services.Core.Analytics",
-        "Unity.Services.Analytics",
-        "Unity.Services.Core.Environments"
-    ],
+    "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
